@@ -1,47 +1,61 @@
 jQuery(document).ready(function($) {
-    $('.post-carousel').each(function() {
-        const $carousel = $(this);
-        const slidesPerView = parseInt($carousel.data('slides-per-view')) || 3;
-        const slidesPerGroup = parseInt($carousel.data('slides-per-group')) || 1;
-        const autoplay = $carousel.data('autoplay') === 'yes';
-        const autoplaySpeed = parseInt($carousel.data('autoplay-speed')) || 3000;
-        const layout = $carousel.data('layout') || 'grid';
-        
-        // Responsive breakpoints
-        const breakpoints = {
-            320: {
-                slidesPerView: 1,
-                slidesPerGroup: 1,
-                spaceBetween: 10
-            },
-            768: {
-                slidesPerView: Math.min(2, slidesPerView),
-                slidesPerGroup: Math.min(2, slidesPerGroup),
-                spaceBetween: 15
-            },
-            1024: {
-                slidesPerView: slidesPerView,
-                slidesPerGroup: slidesPerGroup,
-                spaceBetween: 20
-            }
-        };
-        
-        // Masonry layout handling
-        if (layout === 'masonry') {
-            $carousel.find('.swiper-wrapper').addClass('masonry');
-            return; // Skip Swiper initialization for masonry
+    // Wait for Swiper to be available
+    function initCarousels() {
+        if (typeof Swiper === 'undefined') {
+            setTimeout(initCarousels, 100);
+            return;
         }
         
-        // Initialize Swiper
-        const swiper = new Swiper($carousel[0], {
-            slidesPerView: slidesPerView,
-            slidesPerGroup: slidesPerGroup,
-            spaceBetween: 20,
-            loop: false,
-            grabCursor: true,
+        $('.post-carousel').each(function() {
+            const $carousel = $(this);
+            const slidesPerView = parseInt($carousel.data('slides-per-view')) || 3;
+            const slidesPerGroup = parseInt($carousel.data('slides-per-group')) || 1;
+            const autoplay = $carousel.data('autoplay') === 'yes';
+            const autoplaySpeed = parseInt($carousel.data('autoplay-speed')) || 3000;
+            const layout = $carousel.data('layout') || 'grid';
             
-            // Responsive breakpoints
-            breakpoints: breakpoints,
+            // Skip if already initialized
+            if ($carousel.hasClass('swiper-initialized')) {
+                return;
+            }
+            
+            // Masonry layout handling
+            if (layout === 'masonry') {
+                $carousel.find('.swiper-wrapper').addClass('masonry');
+                return;
+            }
+            
+            // Set CSS custom property for slides per view
+            $carousel[0].style.setProperty('--slides-per-view', slidesPerView);
+            
+            // Initialize Swiper
+            const swiper = new Swiper($carousel[0], {
+                slidesPerView: 'auto',
+                slidesPerGroup: slidesPerGroup,
+                spaceBetween: 20,
+                loop: false,
+                grabCursor: true,
+                centeredSlides: false,
+                watchSlidesProgress: true,
+                
+                // Responsive breakpoints
+                breakpoints: {
+                    320: {
+                        slidesPerView: 'auto',
+                        slidesPerGroup: 1,
+                        spaceBetween: 15
+                    },
+                    768: {
+                        slidesPerView: 'auto',
+                        slidesPerGroup: 1,
+                        spaceBetween: 20
+                    },
+                    1024: {
+                        slidesPerView: 'auto',
+                        slidesPerGroup: slidesPerGroup,
+                        spaceBetween: 20
+                    }
+                },
             
             // Navigation arrows
             navigation: {
@@ -163,9 +177,13 @@ jQuery(document).ready(function($) {
             }
         }
         
-        // Store swiper instance for external access
-        $carousel.data('swiper', swiper);
-    });
+            // Store swiper instance for external access
+            $carousel.data('swiper', swiper);
+        });
+    }
+    
+    // Initialize when DOM is ready
+    initCarousels();
     
     // Handle view all button clicks
     $('.view-all-btn').on('click', function(e) {

@@ -43,14 +43,23 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
             ]
         );
         
-        $this->add_control(
+        $this->add_responsive_control(
             'posts_per_view',
             [
                 'label' => 'Posts Per View',
-                'type' => \Elementor\Controls_Manager::NUMBER,
-                'default' => 3,
-                'min' => 1,
-                'max' => 6,
+                'type' => \Elementor\Controls_Manager::SELECT,
+                'default' => '3',
+                'options' => [
+                    '1' => '1',
+                    '2' => '2', 
+                    '3' => '3',
+                    '4' => '4',
+                    '5' => '5',
+                    '6' => '6',
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .post-carousel' => '--slides-per-view: {{VALUE}};',
+                ],
             ]
         );
         
