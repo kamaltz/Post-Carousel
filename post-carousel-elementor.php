@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Post Carousel Elementor
  * Description: Custom Elementor widget for post carousel with advanced customization
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: kamaltz
  */
 

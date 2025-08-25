@@ -28,8 +28,11 @@ jQuery(document).ready(function($) {
             // Set CSS custom property for slides per view
             $carousel[0].style.setProperty('--slides-per-view', slidesPerView);
             
-            // Initialize Swiper
-            const swiper = new Swiper($carousel[0], {
+            // Initialize Swiper with dynamic config
+            const swiper = new Swiper($carousel[0], config);
+            
+            // Initialize config object
+            var config = {
                 slidesPerView: 'auto',
                 slidesPerGroup: slidesPerGroup,
                 spaceBetween: 20,
@@ -56,19 +59,24 @@ jQuery(document).ready(function($) {
                         spaceBetween: 20
                     }
                 },
+            };
             
-            // Navigation arrows
-            navigation: {
-                nextEl: $carousel.find('.swiper-button-next')[0],
-                prevEl: $carousel.find('.swiper-button-prev')[0],
-            },
+            // Add navigation if buttons exist
+            if ($carousel.find('.swiper-button-next').length > 0) {
+                config.navigation = {
+                    nextEl: $carousel.find('.swiper-button-next')[0],
+                    prevEl: $carousel.find('.swiper-button-prev')[0],
+                };
+            }
             
-            // Pagination
-            pagination: {
-                el: $carousel.find('.swiper-pagination')[0],
-                clickable: true,
-                dynamicBullets: true,
-            },
+            // Add pagination if element exists
+            if ($carousel.find('.swiper-pagination').length > 0) {
+                config.pagination = {
+                    el: $carousel.find('.swiper-pagination')[0],
+                    clickable: true,
+                    dynamicBullets: true,
+                };
+            }
             
             // Autoplay
             autoplay: autoplay ? {
@@ -194,18 +202,26 @@ jQuery(document).ready(function($) {
                     const slidesPerView = parseInt($carousel.data('slides-per-view')) || 3;
                     $carousel[0].style.setProperty('--slides-per-view', slidesPerView);
                     
-                    new Swiper($carousel[0], {
+                    var config = {
                         slidesPerView: 'auto',
                         spaceBetween: 20,
-                        navigation: {
+                    };
+                    
+                    if ($carousel.find('.swiper-button-next').length > 0) {
+                        config.navigation = {
                             nextEl: $carousel.find('.swiper-button-next')[0],
                             prevEl: $carousel.find('.swiper-button-prev')[0],
-                        },
-                        pagination: {
+                        };
+                    }
+                    
+                    if ($carousel.find('.swiper-pagination').length > 0) {
+                        config.pagination = {
                             el: $carousel.find('.swiper-pagination')[0],
                             clickable: true,
-                        },
-                    });
+                        };
+                    }
+                    
+                    new Swiper($carousel[0], config);
                 }
             });
         });

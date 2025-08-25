@@ -133,7 +133,17 @@
 }
 
 .read-more {
-    display: none;
+    color: #e74c3c;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 13px;
+    transition: color 0.3s ease;
+    margin-top: 8px;
+    display: inline-block;
+}
+
+.read-more:hover {
+    color: #c0392b;
 }
 
 /* Swiper Navigation */

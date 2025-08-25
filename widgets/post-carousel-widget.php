@@ -122,6 +122,24 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
         );
         
         $this->add_control(
+            'show_category',
+            [
+                'label' => 'Show Category Badge',
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'default' => 'yes',
+            ]
+        );
+        
+        $this->add_control(
+            'show_read_more',
+            [
+                'label' => 'Show Read More',
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'default' => 'no',
+            ]
+        );
+        
+        $this->add_control(
             'view_all_text',
             [
                 'label' => 'View All Button Text',
@@ -296,6 +314,90 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
         
         $this->end_controls_section();
         
+        // Category Badge Style Section
+        $this->start_controls_section(
+            'category_style_section',
+            [
+                'label' => 'Category Badge Style',
+                'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+                'condition' => [
+                    'show_category' => 'yes',
+                ],
+            ]
+        );
+        
+        $this->add_control(
+            'category_background',
+            [
+                'label' => 'Background Color',
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'default' => '#e74c3c',
+                'selectors' => [
+                    '{{WRAPPER}} .post-category a' => 'background-color: {{VALUE}};',
+                ],
+            ]
+        );
+        
+        $this->add_control(
+            'category_text_color',
+            [
+                'label' => 'Text Color',
+                'type' => \Elementor\Controls_Manager::COLOR,
+                'default' => '#ffffff',
+                'selectors' => [
+                    '{{WRAPPER}} .post-category a' => 'color: {{VALUE}};',
+                ],
+            ]
+        );
+        
+        $this->add_group_control(
+            \Elementor\Group_Control_Typography::get_type(),
+            [
+                'name' => 'category_typography',
+                'selector' => '{{WRAPPER}} .post-category a',
+            ]
+        );
+        
+        $this->add_control(
+            'category_padding',
+            [
+                'label' => 'Padding',
+                'type' => \Elementor\Controls_Manager::DIMENSIONS,
+                'size_units' => ['px', 'em'],
+                'default' => [
+                    'top' => 4,
+                    'right' => 8,
+                    'bottom' => 4,
+                    'left' => 8,
+                    'unit' => 'px',
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .post-category a' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+        
+        $this->add_control(
+            'category_border_radius',
+            [
+                'label' => 'Border Radius',
+                'type' => \Elementor\Controls_Manager::DIMENSIONS,
+                'size_units' => ['px', '%'],
+                'default' => [
+                    'top' => 2,
+                    'right' => 2,
+                    'bottom' => 2,
+                    'left' => 2,
+                    'unit' => 'px',
+                ],
+                'selectors' => [
+                    '{{WRAPPER}} .post-category a' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+                ],
+            ]
+        );
+        
+        $this->end_controls_section();
+        
         // Button Style Section
         $this->start_controls_section(
             'button_style_section',
@@ -398,7 +500,7 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                                     <?php endif; ?>
                                     
                                     <div class="post-content">
-                                        <?php 
+                                        <?php if ($settings['show_category'] === 'yes') :
                                         $categories = get_the_category();
                                         if (!empty($categories)) : ?>
                                             <div class="post-category">
@@ -406,7 +508,7 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                                                     <?php echo esc_html($categories[0]->name); ?>
                                                 </a>
                                             </div>
-                                        <?php endif; ?>
+                                        <?php endif; endif; ?>
                                         
                                         <?php if ($settings['show_title'] === 'yes') : ?>
                                             <h3 class="post-title">
@@ -431,7 +533,9 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                                             </div>
                                         <?php endif; ?>
                                         
-                                        <a href="<?php the_permalink(); ?>" class="read-more">Read More</a>
+                                        <?php if ($settings['show_read_more'] === 'yes') : ?>
+                                            <a href="<?php the_permalink(); ?>" class="read-more">Read More</a>
+                                        <?php endif; ?>
                                     </div>
                                 </article>
                             </div>
@@ -491,6 +595,12 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                                 </div>
                                 
                                 <div class="post-content">
+                                    <# if (settings.show_category === 'yes') { #>
+                                        <div class="post-category">
+                                            <a href="#">Category</a>
+                                        </div>
+                                    <# } #>
+                                    
                                     <# if (settings.show_title === 'yes') { #>
                                         <h3 class="post-title">
                                             <a href="#">Sample Post Title {{{ i }}}</a>
@@ -512,6 +622,10 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                                         <div class="post-excerpt">
                                             This is a sample excerpt for post {{{ i }}}. It shows how the content will look in the carousel.
                                         </div>
+                                    <# } #>
+                                    
+                                    <# if (settings.show_read_more === 'yes') { #>
+                                        <a href="#" class="read-more">Read More</a>
                                     <# } #>
                                 </div>
                             </article>
@@ -547,18 +661,29 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                             var slidesPerView = $(this).data('slides-per-view') || 3;
                             $(this)[0].style.setProperty('--slides-per-view', slidesPerView);
                             
-                            new Swiper(this, {
+                            var showNavigation = $(this).closest('.post-carousel-wrapper').find('.swiper-button-next').length > 0;
+                            var showPagination = $(this).closest('.post-carousel-wrapper').find('.swiper-pagination').length > 0;
+                            
+                            var swiperConfig = {
                                 slidesPerView: 'auto',
                                 spaceBetween: 20,
-                                navigation: {
+                            };
+                            
+                            if (showNavigation) {
+                                swiperConfig.navigation = {
                                     nextEl: $(this).find('.swiper-button-next')[0],
                                     prevEl: $(this).find('.swiper-button-prev')[0],
-                                },
-                                pagination: {
+                                };
+                            }
+                            
+                            if (showPagination) {
+                                swiperConfig.pagination = {
                                     el: $(this).find('.swiper-pagination')[0],
                                     clickable: true,
-                                },
-                            });
+                                };
+                            }
+                            
+                            new Swiper(this, swiperConfig);
                         }
                     });
                 }
