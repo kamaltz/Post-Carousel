@@ -185,6 +185,32 @@ jQuery(document).ready(function($) {
     // Initialize when DOM is ready
     initCarousels();
     
+    // Re-initialize when Elementor editor updates
+    if (window.elementorFrontend) {
+        window.elementorFrontend.hooks.addAction('frontend/element_ready/post_carousel.default', function($scope) {
+            $scope.find('.post-carousel').each(function() {
+                const $carousel = $(this);
+                if (!$carousel.hasClass('swiper-initialized')) {
+                    const slidesPerView = parseInt($carousel.data('slides-per-view')) || 3;
+                    $carousel[0].style.setProperty('--slides-per-view', slidesPerView);
+                    
+                    new Swiper($carousel[0], {
+                        slidesPerView: 'auto',
+                        spaceBetween: 20,
+                        navigation: {
+                            nextEl: $carousel.find('.swiper-button-next')[0],
+                            prevEl: $carousel.find('.swiper-button-prev')[0],
+                        },
+                        pagination: {
+                            el: $carousel.find('.swiper-pagination')[0],
+                            clickable: true,
+                        },
+                    });
+                }
+            });
+        });
+    }
+    
     // Handle view all button clicks
     $('.view-all-btn').on('click', function(e) {
         const $btn = $(this);

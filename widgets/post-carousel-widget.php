@@ -398,6 +398,16 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                                     <?php endif; ?>
                                     
                                     <div class="post-content">
+                                        <?php 
+                                        $categories = get_the_category();
+                                        if (!empty($categories)) : ?>
+                                            <div class="post-category">
+                                                <a href="<?php echo esc_url(get_category_link($categories[0]->term_id)); ?>">
+                                                    <?php echo esc_html($categories[0]->name); ?>
+                                                </a>
+                                            </div>
+                                        <?php endif; ?>
+                                        
                                         <?php if ($settings['show_title'] === 'yes') : ?>
                                             <h3 class="post-title">
                                                 <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
@@ -452,5 +462,109 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
         <?php endif;
         
         wp_reset_postdata();
+    }
+    
+    protected function content_template() {
+        ?>
+        <#
+        var slidesPerView = settings.posts_per_view || 3;
+        var autoplay = settings.autoplay === 'yes';
+        var showNavigation = settings.show_navigation === 'yes';
+        var showPagination = settings.show_pagination === 'yes';
+        #>
+        <div class="post-carousel-wrapper">
+            <div class="swiper post-carousel" 
+                 data-slides-per-view="{{{ slidesPerView }}}"
+                 data-slides-per-group="{{{ settings.posts_per_slide || 1 }}}"
+                 data-autoplay="{{{ autoplay ? 'yes' : 'no' }}}"
+                 data-autoplay-speed="{{{ settings.autoplay_speed || 3000 }}}"
+                 data-layout="{{{ settings.layout_style || 'grid' }}}">
+                
+                <div class="swiper-wrapper">
+                    <# for (var i = 1; i <= (settings.posts_per_page || 6); i++) { #>
+                        <div class="swiper-slide">
+                            <article class="post-card {{{ settings.layout_style || 'grid' }}}">
+                                <div class="post-thumbnail">
+                                    <a href="#">
+                                        <img src="https://via.placeholder.com/400x300/cccccc/666666?text=Post+{{{ i }}}" alt="Post {{{ i }}}">
+                                    </a>
+                                </div>
+                                
+                                <div class="post-content">
+                                    <# if (settings.show_title === 'yes') { #>
+                                        <h3 class="post-title">
+                                            <a href="#">Sample Post Title {{{ i }}}</a>
+                                        </h3>
+                                    <# } #>
+                                    
+                                    <# if (settings.show_date === 'yes' || settings.show_author === 'yes') { #>
+                                        <div class="post-meta">
+                                            <# if (settings.show_date === 'yes') { #>
+                                                <span class="post-date">January 1, 2024</span>
+                                            <# } #>
+                                            <# if (settings.show_author === 'yes') { #>
+                                                <span class="post-author">by Admin</span>
+                                            <# } #>
+                                        </div>
+                                    <# } #>
+                                    
+                                    <# if (settings.show_excerpt === 'yes') { #>
+                                        <div class="post-excerpt">
+                                            This is a sample excerpt for post {{{ i }}}. It shows how the content will look in the carousel.
+                                        </div>
+                                    <# } #>
+                                </div>
+                            </article>
+                        </div>
+                    <# } #>
+                </div>
+                
+                <# if (showNavigation) { #>
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                <# } #>
+                
+                <# if (showPagination) { #>
+                    <div class="swiper-pagination"></div>
+                <# } #>
+            </div>
+            
+            <# if (settings.view_all_text && settings.view_all_url && settings.view_all_url.url) { #>
+                <div class="view-all-wrapper">
+                    <a href="{{{ settings.view_all_url.url }}}" class="view-all-btn">
+                        {{{ settings.view_all_text }}}
+                    </a>
+                </div>
+            <# } #>
+        </div>
+        
+        <script>
+        jQuery(document).ready(function($) {
+            setTimeout(function() {
+                if (typeof Swiper !== 'undefined') {
+                    $('.post-carousel').each(function() {
+                        if (!$(this).hasClass('swiper-initialized')) {
+                            var slidesPerView = $(this).data('slides-per-view') || 3;
+                            $(this)[0].style.setProperty('--slides-per-view', slidesPerView);
+                            
+                            new Swiper(this, {
+                                slidesPerView: 'auto',
+                                spaceBetween: 20,
+                                navigation: {
+                                    nextEl: $(this).find('.swiper-button-next')[0],
+                                    prevEl: $(this).find('.swiper-button-prev')[0],
+                                },
+                                pagination: {
+                                    el: $(this).find('.swiper-pagination')[0],
+                                    clickable: true,
+                                },
+                            });
+                        }
+                    });
+                }
+            }, 100);
+        });
+        </script>
+        <?php
     }
 }

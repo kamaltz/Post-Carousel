@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Post Carousel Elementor
  * Description: Custom Elementor widget for post carousel with advanced customization
- * Version: 1.0.1
+ * Version: 1.2.0
  * Author: kamaltz
  */
 
@@ -27,6 +27,8 @@ class Post_Carousel_Elementor {
         
         add_action('elementor/widgets/widgets_registered', [$this, 'register_widgets']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
+        add_action('elementor/editor/after_enqueue_scripts', [$this, 'enqueue_editor_scripts']);
+        add_action('elementor/preview/enqueue_styles', [$this, 'enqueue_scripts']);
     }
     
     public function admin_notice_missing_elementor() {
@@ -41,8 +43,15 @@ class Post_Carousel_Elementor {
     public function enqueue_scripts() {
         wp_enqueue_script('swiper', 'https://unpkg.com/swiper@8/swiper-bundle.min.js', [], '8.0.0', true);
         wp_enqueue_style('swiper', 'https://unpkg.com/swiper@8/swiper-bundle.min.css', [], '8.0.0');
-        wp_enqueue_script('post-carousel-script', POST_CAROUSEL_ELEMENTOR_URL . 'assets/post-carousel.js', ['jquery', 'swiper'], '1.0.0', true);
-        wp_enqueue_style('post-carousel-style', POST_CAROUSEL_ELEMENTOR_URL . 'assets/post-carousel.css', [], '1.0.0');
+        wp_enqueue_script('post-carousel-script', POST_CAROUSEL_ELEMENTOR_URL . 'assets/post-carousel.js', ['jquery', 'swiper'], '1.0.1', true);
+        wp_enqueue_style('post-carousel-style', POST_CAROUSEL_ELEMENTOR_URL . 'assets/post-carousel.css', [], '1.0.1');
+    }
+    
+    public function enqueue_editor_scripts() {
+        wp_enqueue_script('swiper', 'https://unpkg.com/swiper@8/swiper-bundle.min.js', [], '8.0.0', true);
+        wp_enqueue_style('swiper', 'https://unpkg.com/swiper@8/swiper-bundle.min.css', [], '8.0.0');
+        wp_enqueue_script('post-carousel-script', POST_CAROUSEL_ELEMENTOR_URL . 'assets/post-carousel.js', ['jquery', 'swiper'], '1.0.1', true);
+        wp_enqueue_style('post-carousel-style', POST_CAROUSEL_ELEMENTOR_URL . 'assets/post-carousel.css', [], '1.0.1');
     }
 }
 
