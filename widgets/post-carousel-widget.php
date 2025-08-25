@@ -140,6 +140,16 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
         );
         
         $this->add_control(
+            'title_only_mode',
+            [
+                'label' => 'Title Only Mode',
+                'type' => \Elementor\Controls_Manager::SWITCHER,
+                'default' => 'no',
+                'description' => 'Show only title without excerpt, date, author, or read more',
+            ]
+        );
+        
+        $this->add_control(
             'view_all_text',
             [
                 'label' => 'View All Button Text',
@@ -490,7 +500,7 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                     <div class="swiper-wrapper">
                         <?php while ($posts->have_posts()) : $posts->the_post(); ?>
                             <div class="swiper-slide">
-                                <article class="post-card <?php echo esc_attr($settings['layout_style']); ?>">
+                                <article class="post-card <?php echo esc_attr($settings['layout_style']); ?> <?php echo $settings['title_only_mode'] === 'yes' ? 'title-only' : ''; ?>">
                                     <?php if (has_post_thumbnail()) : ?>
                                         <div class="post-thumbnail">
                                             <a href="<?php the_permalink(); ?>">
@@ -516,25 +526,27 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                                             </h3>
                                         <?php endif; ?>
                                         
-                                        <?php if ($settings['show_date'] === 'yes' || $settings['show_author'] === 'yes') : ?>
-                                            <div class="post-meta">
-                                                <?php if ($settings['show_date'] === 'yes') : ?>
-                                                    <span class="post-date"><?php echo get_the_date(); ?></span>
-                                                <?php endif; ?>
-                                                <?php if ($settings['show_author'] === 'yes') : ?>
-                                                    <span class="post-author">by <?php the_author(); ?></span>
-                                                <?php endif; ?>
-                                            </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if ($settings['show_excerpt'] === 'yes') : ?>
-                                            <div class="post-excerpt">
-                                                <?php echo wp_trim_words(get_the_excerpt(), 20); ?>
-                                            </div>
-                                        <?php endif; ?>
-                                        
-                                        <?php if ($settings['show_read_more'] === 'yes') : ?>
-                                            <a href="<?php the_permalink(); ?>" class="read-more">Read More</a>
+                                        <?php if ($settings['title_only_mode'] !== 'yes') : ?>
+                                            <?php if ($settings['show_date'] === 'yes' || $settings['show_author'] === 'yes') : ?>
+                                                <div class="post-meta">
+                                                    <?php if ($settings['show_date'] === 'yes') : ?>
+                                                        <span class="post-date"><?php echo get_the_date(); ?></span>
+                                                    <?php endif; ?>
+                                                    <?php if ($settings['show_author'] === 'yes') : ?>
+                                                        <span class="post-author">by <?php the_author(); ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            
+                                            <?php if ($settings['show_excerpt'] === 'yes') : ?>
+                                                <div class="post-excerpt">
+                                                    <?php echo wp_trim_words(get_the_excerpt(), 20); ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            
+                                            <?php if ($settings['show_read_more'] === 'yes') : ?>
+                                                <a href="<?php the_permalink(); ?>" class="read-more">Read More</a>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </div>
                                 </article>
@@ -546,11 +558,11 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                         <div class="swiper-button-next"></div>
                         <div class="swiper-button-prev"></div>
                     <?php endif; ?>
-                    
-                    <?php if ($settings['show_pagination'] === 'yes') : ?>
-                        <div class="swiper-pagination"></div>
-                    <?php endif; ?>
                 </div>
+                
+                <?php if ($settings['show_pagination'] === 'yes') : ?>
+                    <div class="swiper-pagination"></div>
+                <?php endif; ?>
                 
                 <?php if (!empty($settings['view_all_text']) && !empty($settings['view_all_url']['url'])) : ?>
                     <div class="view-all-wrapper">
@@ -587,7 +599,7 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                 <div class="swiper-wrapper">
                     <# for (var i = 1; i <= (settings.posts_per_page || 6); i++) { #>
                         <div class="swiper-slide">
-                            <article class="post-card {{{ settings.layout_style || 'grid' }}}">
+                            <article class="post-card {{{ settings.layout_style || 'grid' }}} <# if (settings.title_only_mode === 'yes') { #>title-only<# } #>">
                                 <div class="post-thumbnail">
                                     <a href="#">
                                         <img src="https://via.placeholder.com/400x300/cccccc/666666?text=Post+{{{ i }}}" alt="Post {{{ i }}}">
@@ -607,25 +619,27 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                                         </h3>
                                     <# } #>
                                     
-                                    <# if (settings.show_date === 'yes' || settings.show_author === 'yes') { #>
-                                        <div class="post-meta">
-                                            <# if (settings.show_date === 'yes') { #>
-                                                <span class="post-date">January 1, 2024</span>
-                                            <# } #>
-                                            <# if (settings.show_author === 'yes') { #>
-                                                <span class="post-author">by Admin</span>
-                                            <# } #>
-                                        </div>
-                                    <# } #>
-                                    
-                                    <# if (settings.show_excerpt === 'yes') { #>
-                                        <div class="post-excerpt">
-                                            This is a sample excerpt for post {{{ i }}}. It shows how the content will look in the carousel.
-                                        </div>
-                                    <# } #>
-                                    
-                                    <# if (settings.show_read_more === 'yes') { #>
-                                        <a href="#" class="read-more">Read More</a>
+                                    <# if (settings.title_only_mode !== 'yes') { #>
+                                        <# if (settings.show_date === 'yes' || settings.show_author === 'yes') { #>
+                                            <div class="post-meta">
+                                                <# if (settings.show_date === 'yes') { #>
+                                                    <span class="post-date">January 1, 2024</span>
+                                                <# } #>
+                                                <# if (settings.show_author === 'yes') { #>
+                                                    <span class="post-author">by Admin</span>
+                                                <# } #>
+                                            </div>
+                                        <# } #>
+                                        
+                                        <# if (settings.show_excerpt === 'yes') { #>
+                                            <div class="post-excerpt">
+                                                This is a sample excerpt for post {{{ i }}}. It shows how the content will look in the carousel.
+                                            </div>
+                                        <# } #>
+                                        
+                                        <# if (settings.show_read_more === 'yes') { #>
+                                            <a href="#" class="read-more">Read More</a>
+                                        <# } #>
                                     <# } #>
                                 </div>
                             </article>
@@ -637,11 +651,11 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                     <div class="swiper-button-next"></div>
                     <div class="swiper-button-prev"></div>
                 <# } #>
-                
-                <# if (showPagination) { #>
-                    <div class="swiper-pagination"></div>
-                <# } #>
             </div>
+            
+            <# if (showPagination) { #>
+                <div class="swiper-pagination"></div>
+            <# } #>
             
             <# if (settings.view_all_text && settings.view_all_url && settings.view_all_url.url) { #>
                 <div class="view-all-wrapper">
@@ -678,7 +692,7 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                             
                             if (showPagination) {
                                 swiperConfig.pagination = {
-                                    el: $(this).find('.swiper-pagination')[0],
+                                    el: $(this).closest('.post-carousel-wrapper').find('.swiper-pagination')[0],
                                     clickable: true,
                                 };
                             }

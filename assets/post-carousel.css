@@ -28,6 +28,14 @@
     position: relative;
 }
 
+.post-card.title-only {
+    min-height: auto;
+}
+
+.post-card.title-only .post-content {
+    padding-top: 0;
+}
+
 .post-card:hover {
     transform: none;
     box-shadow: none;

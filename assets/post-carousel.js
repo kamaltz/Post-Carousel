@@ -70,9 +70,9 @@ jQuery(document).ready(function($) {
             }
             
             // Add pagination if element exists
-            if ($carousel.find('.swiper-pagination').length > 0) {
+            if ($carousel.closest('.post-carousel-wrapper').find('.swiper-pagination').length > 0) {
                 config.pagination = {
-                    el: $carousel.find('.swiper-pagination')[0],
+                    el: $carousel.closest('.post-carousel-wrapper').find('.swiper-pagination')[0],
                     clickable: true,
                     dynamicBullets: true,
                 };
@@ -196,36 +196,43 @@ jQuery(document).ready(function($) {
     // Re-initialize when Elementor editor updates
     if (window.elementorFrontend) {
         window.elementorFrontend.hooks.addAction('frontend/element_ready/post_carousel.default', function($scope) {
-            $scope.find('.post-carousel').each(function() {
-                const $carousel = $(this);
-                if (!$carousel.hasClass('swiper-initialized')) {
-                    const slidesPerView = parseInt($carousel.data('slides-per-view')) || 3;
-                    $carousel[0].style.setProperty('--slides-per-view', slidesPerView);
-                    
-                    var config = {
-                        slidesPerView: 'auto',
-                        spaceBetween: 20,
-                    };
-                    
-                    if ($carousel.find('.swiper-button-next').length > 0) {
-                        config.navigation = {
-                            nextEl: $carousel.find('.swiper-button-next')[0],
-                            prevEl: $carousel.find('.swiper-button-prev')[0],
+            setTimeout(function() {
+                $scope.find('.post-carousel').each(function() {
+                    const $carousel = $(this);
+                    if (!$carousel.hasClass('swiper-initialized')) {
+                        const slidesPerView = parseInt($carousel.data('slides-per-view')) || 3;
+                        $carousel[0].style.setProperty('--slides-per-view', slidesPerView);
+                        
+                        var config = {
+                            slidesPerView: 'auto',
+                            spaceBetween: 20,
                         };
+                        
+                        if ($carousel.find('.swiper-button-next').length > 0) {
+                            config.navigation = {
+                                nextEl: $carousel.find('.swiper-button-next')[0],
+                                prevEl: $carousel.find('.swiper-button-prev')[0],
+                            };
+                        }
+                        
+                        if ($carousel.closest('.post-carousel-wrapper').find('.swiper-pagination').length > 0) {
+                            config.pagination = {
+                                el: $carousel.closest('.post-carousel-wrapper').find('.swiper-pagination')[0],
+                                clickable: true,
+                            };
+                        }
+                        
+                        new Swiper($carousel[0], config);
                     }
-                    
-                    if ($carousel.find('.swiper-pagination').length > 0) {
-                        config.pagination = {
-                            el: $carousel.find('.swiper-pagination')[0],
-                            clickable: true,
-                        };
-                    }
-                    
-                    new Swiper($carousel[0], config);
-                }
-            });
+                });
+            }, 200);
         });
     }
+    
+    // Handle Elementor editor changes
+    $(document).on('elementor/render/widget', function() {
+        setTimeout(initCarousels, 300);
+    });
     
     // Handle view all button clicks
     $('.view-all-btn').on('click', function(e) {

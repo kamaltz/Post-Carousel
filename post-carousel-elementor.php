@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Post Carousel Elementor
  * Description: Custom Elementor widget for post carousel with advanced customization
- * Version: 1.3.0
+ * Version: 1.5.0
  * Author: kamaltz
  */
 
@@ -29,6 +29,7 @@ class Post_Carousel_Elementor {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
         add_action('elementor/editor/after_enqueue_scripts', [$this, 'enqueue_editor_scripts']);
         add_action('elementor/preview/enqueue_styles', [$this, 'enqueue_scripts']);
+        add_action('elementor/frontend/after_enqueue_scripts', [$this, 'enqueue_scripts']);
     }
     
     public function admin_notice_missing_elementor() {
