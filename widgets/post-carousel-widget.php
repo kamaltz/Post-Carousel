@@ -224,10 +224,25 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
             [
                 'label' => 'Autoplay Speed (ms)',
                 'type' => \Elementor\Controls_Manager::NUMBER,
-                'default' => 3000,
+                'default' => 5000,
+                'min' => 1000,
+                'max' => 10000,
+                'step' => 500,
                 'condition' => [
                     'autoplay' => 'yes',
                 ],
+            ]
+        );
+        
+        $this->add_control(
+            'slide_speed',
+            [
+                'label' => 'Slide Speed (ms)',
+                'type' => \Elementor\Controls_Manager::NUMBER,
+                'default' => 600,
+                'min' => 200,
+                'max' => 2000,
+                'step' => 100,
             ]
         );
         
@@ -494,7 +509,8 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                      data-slides-per-view="<?php echo esc_attr($settings['posts_per_view']); ?>"
                      data-slides-per-group="<?php echo esc_attr($settings['posts_per_slide']); ?>"
                      data-autoplay="<?php echo esc_attr($settings['autoplay']); ?>"
-                     data-autoplay-speed="<?php echo esc_attr($settings['autoplay_speed']); ?>"
+                     data-autoplay-speed="<?php echo esc_attr($settings['autoplay_speed'] ?: 5000); ?>"
+                     data-slide-speed="<?php echo esc_attr($settings['slide_speed'] ?: 600); ?>"
                      data-layout="<?php echo esc_attr($settings['layout_style']); ?>">
                     
                     <div class="swiper-wrapper">
@@ -593,7 +609,8 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                  data-slides-per-view="{{{ slidesPerView }}}"
                  data-slides-per-group="{{{ settings.posts_per_slide || 1 }}}"
                  data-autoplay="{{{ autoplay ? 'yes' : 'no' }}}"
-                 data-autoplay-speed="{{{ settings.autoplay_speed || 3000 }}}"
+                 data-autoplay-speed="{{{ settings.autoplay_speed || 5000 }}}"
+                 data-slide-speed="{{{ settings.slide_speed || 600 }}}"
                  data-layout="{{{ settings.layout_style || 'grid' }}}">
                 
                 <div class="swiper-wrapper">
@@ -673,27 +690,41 @@ class Post_Carousel_Widget extends \Elementor\Widget_Base {
                     $('.post-carousel').each(function() {
                         if (!$(this).hasClass('swiper-initialized')) {
                             var slidesPerView = $(this).data('slides-per-view') || 3;
+                            var autoplay = $(this).data('autoplay') === 'yes';
+                            var autoplaySpeed = parseInt($(this).data('autoplay-speed')) || 5000;
+                            var slideSpeed = parseInt($(this).data('slide-speed')) || 600;
+                            
                             $(this)[0].style.setProperty('--slides-per-view', slidesPerView);
                             
-                            var showNavigation = $(this).closest('.post-carousel-wrapper').find('.swiper-button-next').length > 0;
-                            var showPagination = $(this).closest('.post-carousel-wrapper').find('.swiper-pagination').length > 0;
-                            
                             var swiperConfig = {
-                                slidesPerView: 'auto',
+                                slidesPerView: slidesPerView,
                                 spaceBetween: 20,
+                                speed: slideSpeed,
+                                breakpoints: {
+                                    320: { slidesPerView: 1 },
+                                    768: { slidesPerView: Math.min(2, slidesPerView) },
+                                    1024: { slidesPerView: slidesPerView }
+                                }
                             };
                             
-                            if (showNavigation) {
+                            if ($(this).find('.swiper-button-next').length > 0) {
                                 swiperConfig.navigation = {
                                     nextEl: $(this).find('.swiper-button-next')[0],
                                     prevEl: $(this).find('.swiper-button-prev')[0],
                                 };
                             }
                             
-                            if (showPagination) {
+                            if ($(this).closest('.post-carousel-wrapper').find('.swiper-pagination').length > 0) {
                                 swiperConfig.pagination = {
                                     el: $(this).closest('.post-carousel-wrapper').find('.swiper-pagination')[0],
                                     clickable: true,
+                                };
+                            }
+                            
+                            if (autoplay) {
+                                swiperConfig.autoplay = {
+                                    delay: autoplaySpeed,
+                                    disableOnInteraction: false,
                                 };
                             }
                             

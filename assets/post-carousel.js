@@ -1,5 +1,4 @@
 jQuery(document).ready(function($) {
-    // Wait for Swiper to be available
     function initCarousels() {
         if (typeof Swiper === 'undefined') {
             setTimeout(initCarousels, 100);
@@ -11,57 +10,48 @@ jQuery(document).ready(function($) {
             const slidesPerView = parseInt($carousel.data('slides-per-view')) || 3;
             const slidesPerGroup = parseInt($carousel.data('slides-per-group')) || 1;
             const autoplay = $carousel.data('autoplay') === 'yes';
-            const autoplaySpeed = parseInt($carousel.data('autoplay-speed')) || 3000;
+            const autoplaySpeed = parseInt($carousel.data('autoplay-speed')) || 5000;
+            const slideSpeed = parseInt($carousel.data('slide-speed')) || 600;
             const layout = $carousel.data('layout') || 'grid';
             
-            // Skip if already initialized
             if ($carousel.hasClass('swiper-initialized')) {
                 return;
             }
             
-            // Masonry layout handling
             if (layout === 'masonry') {
                 $carousel.find('.swiper-wrapper').addClass('masonry');
                 return;
             }
             
-            // Set CSS custom property for slides per view
             $carousel[0].style.setProperty('--slides-per-view', slidesPerView);
             
-            // Initialize Swiper with dynamic config
-            const swiper = new Swiper($carousel[0], config);
-            
-            // Initialize config object
             var config = {
-                slidesPerView: 'auto',
+                slidesPerView: slidesPerView,
                 slidesPerGroup: slidesPerGroup,
                 spaceBetween: 20,
                 loop: false,
                 grabCursor: true,
-                centeredSlides: false,
-                watchSlidesProgress: true,
+                speed: slideSpeed,
                 
-                // Responsive breakpoints
                 breakpoints: {
                     320: {
-                        slidesPerView: 'auto',
+                        slidesPerView: 1,
                         slidesPerGroup: 1,
                         spaceBetween: 15
                     },
                     768: {
-                        slidesPerView: 'auto',
+                        slidesPerView: Math.min(2, slidesPerView),
                         slidesPerGroup: 1,
                         spaceBetween: 20
                     },
                     1024: {
-                        slidesPerView: 'auto',
+                        slidesPerView: slidesPerView,
                         slidesPerGroup: slidesPerGroup,
                         spaceBetween: 20
                     }
-                },
+                }
             };
             
-            // Add navigation if buttons exist
             if ($carousel.find('.swiper-button-next').length > 0) {
                 config.navigation = {
                     nextEl: $carousel.find('.swiper-button-next')[0],
@@ -69,7 +59,6 @@ jQuery(document).ready(function($) {
                 };
             }
             
-            // Add pagination if element exists
             if ($carousel.closest('.post-carousel-wrapper').find('.swiper-pagination').length > 0) {
                 config.pagination = {
                     el: $carousel.closest('.post-carousel-wrapper').find('.swiper-pagination')[0],
@@ -78,122 +67,22 @@ jQuery(document).ready(function($) {
                 };
             }
             
-            // Autoplay
-            autoplay: autoplay ? {
-                delay: autoplaySpeed,
-                disableOnInteraction: false,
-                pauseOnMouseEnter: true,
-            } : false,
-            
-            // Effects
-            effect: 'slide',
-            speed: 600,
-            
-            // Accessibility
-            a11y: {
-                prevSlideMessage: 'Previous slide',
-                nextSlideMessage: 'Next slide',
-                paginationBulletMessage: 'Go to slide {{index}}',
-            },
-            
-            // Keyboard control
-            keyboard: {
-                enabled: true,
-                onlyInViewport: true,
-            },
-            
-            // Mouse wheel control
-            mousewheel: {
-                forceToAxis: true,
-            },
-            
-            // Events
-            on: {
-                init: function() {
-                    // Add loaded class for animations
-                    $carousel.addClass('swiper-loaded');
-                    
-                    // Lazy loading images
-                    $carousel.find('img').each(function() {
-                        const $img = $(this);
-                        if ($img.attr('data-src')) {
-                            $img.attr('src', $img.attr('data-src'));
-                            $img.removeAttr('data-src');
-                        }
-                    });
-                },
-                
-                slideChange: function() {
-                    // Update active slide styling
-                    $carousel.find('.swiper-slide').removeClass('slide-active');
-                    $carousel.find('.swiper-slide-active').addClass('slide-active');
-                },
-                
-                reachEnd: function() {
-                    // Handle end of slides
-                    $carousel.addClass('swiper-end');
-                },
-                
-                reachBeginning: function() {
-                    // Handle beginning of slides
-                    $carousel.removeClass('swiper-end');
-                }
+            if (autoplay) {
+                config.autoplay = {
+                    delay: autoplaySpeed,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true,
+                };
             }
-        });
-        
-        // Handle window resize
-        $(window).on('resize', function() {
-            if (swiper) {
-                swiper.update();
-            }
-        });
-        
-        // Pause autoplay on hover
-        if (autoplay) {
-            $carousel.on('mouseenter', function() {
-                swiper.autoplay.stop();
-            }).on('mouseleave', function() {
-                swiper.autoplay.start();
-            });
-        }
-        
-        // Handle touch events for mobile
-        let touchStartX = 0;
-        let touchEndX = 0;
-        
-        $carousel.on('touchstart', function(e) {
-            touchStartX = e.originalEvent.changedTouches[0].screenX;
-        });
-        
-        $carousel.on('touchend', function(e) {
-            touchEndX = e.originalEvent.changedTouches[0].screenX;
-            handleSwipe();
-        });
-        
-        function handleSwipe() {
-            const swipeThreshold = 50;
-            const diff = touchStartX - touchEndX;
             
-            if (Math.abs(diff) > swipeThreshold) {
-                if (diff > 0) {
-                    // Swipe left - next slide
-                    swiper.slideNext();
-                } else {
-                    // Swipe right - previous slide
-                    swiper.slidePrev();
-                }
-            }
-        }
-        
-            // Store swiper instance for external access
+            const swiper = new Swiper($carousel[0], config);
+            
             $carousel.data('swiper', swiper);
         });
     }
     
-    // Initialize when DOM is ready
     initCarousels();
     
-    // Re-initialize when Elementor editor updates
     if (window.elementorFrontend) {
         window.elementorFrontend.hooks.addAction('frontend/element_ready/post_carousel.default', function($scope) {
             setTimeout(function() {
@@ -201,11 +90,21 @@ jQuery(document).ready(function($) {
                     const $carousel = $(this);
                     if (!$carousel.hasClass('swiper-initialized')) {
                         const slidesPerView = parseInt($carousel.data('slides-per-view')) || 3;
+                        const autoplay = $carousel.data('autoplay') === 'yes';
+                        const autoplaySpeed = parseInt($carousel.data('autoplay-speed')) || 5000;
+                        const slideSpeed = parseInt($carousel.data('slide-speed')) || 600;
+                        
                         $carousel[0].style.setProperty('--slides-per-view', slidesPerView);
                         
                         var config = {
-                            slidesPerView: 'auto',
+                            slidesPerView: slidesPerView,
                             spaceBetween: 20,
+                            speed: slideSpeed,
+                            breakpoints: {
+                                320: { slidesPerView: 1 },
+                                768: { slidesPerView: Math.min(2, slidesPerView) },
+                                1024: { slidesPerView: slidesPerView }
+                            }
                         };
                         
                         if ($carousel.find('.swiper-button-next').length > 0) {
@@ -222,6 +121,13 @@ jQuery(document).ready(function($) {
                             };
                         }
                         
+                        if (autoplay) {
+                            config.autoplay = {
+                                delay: autoplaySpeed,
+                                disableOnInteraction: false,
+                            };
+                        }
+                        
                         new Swiper($carousel[0], config);
                     }
                 });
@@ -229,52 +135,7 @@ jQuery(document).ready(function($) {
         });
     }
     
-    // Handle Elementor editor changes
     $(document).on('elementor/render/widget', function() {
         setTimeout(initCarousels, 300);
     });
-    
-    // Handle view all button clicks
-    $('.view-all-btn').on('click', function(e) {
-        const $btn = $(this);
-        const href = $btn.attr('href');
-        
-        // Add loading state
-        $btn.addClass('loading').text('Loading...');
-        
-        // Analytics tracking (if available)
-        if (typeof gtag !== 'undefined') {
-            gtag('event', 'click', {
-                'event_category': 'Post Carousel',
-                'event_label': 'View All Button',
-                'value': href
-            });
-        }
-        
-        // Restore button state after navigation
-        setTimeout(function() {
-            $btn.removeClass('loading');
-        }, 1000);
-    });
-    
-    // Intersection Observer for lazy loading
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver(function(entries, observer) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    if (img.dataset.src) {
-                        img.src = img.dataset.src;
-                        img.removeAttribute('data-src');
-                        img.classList.add('loaded');
-                        observer.unobserve(img);
-                    }
-                }
-            });
-        });
-        
-        $('.post-carousel img[data-src]').each(function() {
-            imageObserver.observe(this);
-        });
-    }
 });
